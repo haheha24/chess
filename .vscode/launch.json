@@ -3,12 +3,20 @@
     "configurations": [
         {
             "name": "Launch",
-            "type": "cppvsdbg",
+            "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/chess",
-            "args": [],
+            "program": "${workspaceFolder}/gui",
+            "environment": [
+                {
+                    "name": "config",
+                    "value": "Debug"
+                }
+            ],
             "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal"
+            "windows": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "C:\\msys64\\ucrt64\\bin\\gdb.exe"
+            },
         }
     ]
 }

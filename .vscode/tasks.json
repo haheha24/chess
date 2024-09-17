@@ -3,8 +3,26 @@
     "tasks": [
         {
             "label": "Build",
-            "type": "shell",
-            "command": "sh build.sh",
+            "type": "cppbuild",
+            "command": "C:/msys64/ucrt64/bin/g++.exe",
+            "args": [
+                "-I${workspaceFolder}/include",
+                "-Wall",
+                "-g",
+                "src/*.cpp",
+                "src/*.c",
+                "-o",
+                "gui.exe",
+                "-lopengl32",
+                "-luser32",
+                "-lgdi32"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
