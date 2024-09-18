@@ -2,10 +2,11 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build",
+            "label": "Main Build",
             "type": "cppbuild",
             "command": "C:/msys64/ucrt64/bin/g++.exe",
             "args": [
+                "-fdiagnostics-color=always",
                 "-I${workspaceFolder}/include",
                 "-Wall",
                 "-g",
@@ -26,6 +27,34 @@
             "group": {
                 "kind": "build",
                 "isDefault": true
+            }
+        },
+        {
+            "label": "Build and Debug",
+            "type": "cppbuild",
+            "command": "C:/msys64/ucrt64/bin/g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-I${workspaceFolder}/include",
+                "-Wall",
+                "-g",
+                "src/*.cpp",
+                "src/*.c",
+                "-o",
+                "gui.exe",
+                "-lopengl32",
+                "-luser32",
+                "-lgdi32"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
             }
         }
     ]

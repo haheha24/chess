@@ -7,9 +7,9 @@
 
 #include <iostream>
 #include "win32_platform.h"
-#include <glad/glad_wgl.h>
+#include "glad/glad_wgl.h"
 
-Window::Window(wchar_t* title) : className(title) {
+Window::Window(const wchar_t* title) : className(title) {
 }
 
 /**
@@ -33,7 +33,7 @@ LRESULT CALLBACK Window::windowProc(HWND window, UINT msg, WPARAM wParam, LPARAM
     // Make sure pThis is valid before calling any instance method
     if (pThis) {
         // Call the non-static member function to handle the message
-        return pThis->handleMessage(window, msg, wParam, lParam);
+        return pThis->handleWindowProc(window, msg, wParam, lParam);
     }
 
     // Fallback to default if pThis is null
@@ -41,7 +41,7 @@ LRESULT CALLBACK Window::windowProc(HWND window, UINT msg, WPARAM wParam, LPARAM
 }
 
 // The 'real' windowProc
-LRESULT Window::handleMessage(HWND window, UINT msg, WPARAM wParam, LPARAM lParam) {
+LRESULT Window::handleWindowProc(HWND window, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
         case WM_PAINT:
             break;

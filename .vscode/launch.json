@@ -2,21 +2,26 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch",
+            "name": "Debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/gui",
+            "program": "${workspaceFolder}/gui.exe",
+            "cwd": "${workspaceFolder}",
             "environment": [
                 {
-                    "name": "config",
-                    "value": "Debug"
+                    "name": "PATH",
+                    "value": "C:/msys64/ucrt64/bin;${env:PATH}" // Prepend the correct path
                 }
             ],
-            "cwd": "${workspaceFolder}",
-            "windows": {
-                "MIMode": "gdb",
-                "miDebuggerPath": "C:\\msys64\\ucrt64\\bin\\gdb.exe"
-            },
-        }
+            "externalConsole": false,
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build and Debug",
+        },
     ]
 }

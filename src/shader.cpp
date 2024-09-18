@@ -1,11 +1,12 @@
 #include "shader.h"
+#include "glad/glad_wgl.h"  // include glad to get all the required OpenGL headers
 
-#include <glad/glad_wgl.h>  // include glad to get all the required OpenGL headers
-
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
+// The moment the string is read, segfault occurs?????????
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
@@ -72,8 +73,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
-                  << infoLog << std::endl;
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 
     // delete the shaders as they're linked into our program now and no longer necessary

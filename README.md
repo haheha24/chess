@@ -1,1 +1,1 @@
-# Chess
+# Not a chess game
