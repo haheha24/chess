@@ -56,6 +56,29 @@
                 "kind": "build",
                 "isDefault": false
             }
+        },
+        {
+            "label": "test debug",
+            "type": "cppbuild",
+            "command": "C:/msys64/ucrt64/bin/g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-Wall",
+                "-g",
+                "src/minimalTest.cpp",
+                "-o",
+                "test.exe",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
         }
     ]
 }
