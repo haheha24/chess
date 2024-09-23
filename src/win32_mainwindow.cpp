@@ -1,13 +1,14 @@
-#include "win32_basewindow.h"
+#include <iostream>
+#include "win32_mainwindow.h"
 
-bool win32_closeWindow(bool close) {
-    return close = true;
-}
-
-LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+LRESULT _WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    WindowBase* windowPtr = reinterpret_cast<WindowBase*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
     switch (msg) {
         case WM_CLOSE:
             std::cout << "WM_CLOSE: " << msg << "\n";
+            if (windowPtr) {
+                win32_closeWindow(*windowPtr);
+            }
             DestroyWindow(hwnd);
             return 0;
         case WM_DESTROY:
@@ -35,22 +36,22 @@ LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     return 0;
 }
 
-HWND* win32_createWindow(PCWSTR lpWindowName,
-                         DWORD dwStyle,
-                         DWORD dwExStyle,
-                         int x,
-                         int y,
-                         int nWidth,
-                         int nHeight,
-                         HWND hWndParent,
-                         HMENU hMenu) {
-    static HWND hwnd;
+WindowBasePtr win32_createWindow(PCWSTR lpWindowName,
+                                 DWORD dwStyle,
+                                 DWORD dwExStyle,
+                                 int x,
+                                 int y,
+                                 int nWidth,
+                                 int nHeight,
+                                 HWND hWndParent,
+                                 HMENU hMenu) {
+    HWND hwnd;
     WNDCLASSEX wc = {0};
 
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
-    wc.lpfnWndProc = WindowProc;  // Callback for Input into the Window
+    wc.lpfnWndProc = _WindowProc;  // Callback for Input into the Window
     wc.hInstance = GetModuleHandle(NULL);
     wc.hIcon = LoadIcon(GetModuleHandle(NULL), IDI_APPLICATION);
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
@@ -59,7 +60,7 @@ HWND* win32_createWindow(PCWSTR lpWindowName,
 
     if (!RegisterClassEx(&wc)) {
         std::cerr << "Window registration failed.\n";
-        return 0;
+        return NULL;
     }
 
     // Window config
@@ -83,26 +84,31 @@ HWND* win32_createWindow(PCWSTR lpWindowName,
 
     if (hwnd == NULL) {
         std::cerr << "Failed to create m_hwnd. ERROR: " << GetLastError() << "\n";
-        return 0;
+        return NULL;
     }
 
-    if (!win32_makeContextCurrent(&hwnd)) {
+    WindowBasePtr windowNode = win32_nodeCreate();
+    windowNode->handle = hwnd;
+    // Store the window pointer in the user data of the HWND so that it can be accessed by the _WindowProc
+    SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(windowNode.get()));
+
+    if (!win32_makeContextCurrent(hwnd)) {
         std::cout << "Failed to load OpenGL Context" << "\n";
-        return 0;
+        return NULL;
     }
 
     // Show the main window
     ShowWindow(hwnd, SW_SHOW);
 
-    return &hwnd;
+    return windowNode;
 }
 
-bool win32_windowShouldClose() {
+void win32_updateWindow(WindowBasePtr& window) {
     MSG msg;
     BOOL ret;
-    while ((ret = GetMessage(&msg, NULL, 0, 0)) != 0) {
+    while ((ret = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) != 0) {
         if (ret == -1) {
-            std::cout << "There was an error in the msg when updating the msg loop: " << "\n";
+            std::cout << "There was an error in the msg loop: " << GetLastError() << "\n";
         } else {
             TranslateMessage(&msg);
             DispatchMessage(&msg);  // Calls the callback specified when creating the window
@@ -110,13 +116,17 @@ bool win32_windowShouldClose() {
     }
 }
 
-void win32_closeWindow(HWND* hwnd) {
-    delete hwnd;
+void win32_closeWindow(WindowBase& window) {
+    window.shouldClose = true;
 }
 
-bool win32_makeContextCurrent(HWND* hwnd) {
+bool win32_windowShouldClose(bool shouldClose) {
+    return shouldClose;
+}
+
+bool win32_makeContextCurrent(HWND& hwnd) {
     // Device Context
-    HDC hdc = GetDC(*hwnd);
+    HDC hdc = GetDC(hwnd);
 
     // Create create, choose and set the pixel format
     PIXELFORMATDESCRIPTOR pfd = {0};
@@ -128,14 +138,24 @@ bool win32_makeContextCurrent(HWND* hwnd) {
     pfd.cDepthBits = 24;
 
     int pixelFormat = ChoosePixelFormat(hdc, &pfd);
-    SetPixelFormat(hdc, pixelFormat, &pfd);
+    if (!SetPixelFormat(hdc, pixelFormat, &pfd)) {
+        std::cout << "Failed to Set pixel format\n";
+        return false;
+    }
 
     // Temp context
     HGLRC tempContext = wglCreateContext(hdc);
     wglMakeCurrent(hdc, tempContext);
+    if (!wglMakeCurrent(hdc, tempContext)) {
+        std::cout << "Failed to make WGL Temporary Context current\n";
+        return false;
+    }
 
     // Load WGL extensions
-    gladLoadWGL(hdc);
+    if (!gladLoadWGL(hdc)) {
+        std::cout << "Failed to load WGL extensions\n";
+        return false;
+    }
 
     // Set OpenGL versions
     const int attribList[] = {
@@ -156,10 +176,17 @@ bool win32_makeContextCurrent(HWND* hwnd) {
     // Release the device context
     wglMakeCurrent(NULL, NULL);
     wglDeleteContext(tempContext);
-    wglMakeCurrent(hdc, openglContext);
+
+    if (!wglMakeCurrent(hdc, openglContext)) {
+        std::cout << "Failed to make OpenGl Context current\n";
+        return false;
+    }
 
     // Load glad and opengl functions
-    gladLoadGL();
+    if (!gladLoadGL()) {
+        std::cout << "Failed to load Glad OpenGL\n";
+        return false;
+    }
 
     return true;
 }
