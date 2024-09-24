@@ -5,7 +5,6 @@ LRESULT _WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     WindowBase* windowPtr = reinterpret_cast<WindowBase*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
     switch (msg) {
         case WM_CLOSE:
-            std::cout << "WM_CLOSE: " << msg << "\n";
             if (windowPtr) {
                 win32_closeWindow(*windowPtr);
             }
@@ -13,23 +12,16 @@ LRESULT _WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             return 0;
         case WM_DESTROY:
             PostQuitMessage(0);
-            std::cout << "WM_DESTROY: " << msg << "\n";
             return 0;
         case WM_PAINT: {
             PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
+            BeginPaint(hwnd, &ps);
 
             // All painting occurs here, between BeginPaint and EndPaint.
 
-            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-
             EndPaint(hwnd, &ps);
-            std::cout << "End Paint: " << msg << "\n";
             return 0;
         }
-        case WM_CREATE:
-            std::cout << "WM_CREATE: " << msg << "\n";
-            return 0;
         default:
             return DefWindowProc(hwnd, msg, wParam, lParam);
     }
