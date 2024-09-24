@@ -6,7 +6,6 @@
 #include <iostream>
 #include <sstream>
 
-// The moment the string is read, segfault occurs?????????
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
@@ -76,6 +75,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
                   << infoLog << std::endl;
     }
+
+    checkCompileErrors(ID, "PROGRAM");
 
     // delete the shaders as they're linked into our program now and no longer necessary
     glDeleteShader(vertex);
