@@ -1,16 +1,16 @@
 #include <iostream>
 #include "application.h"
 #include "win32_mainwindow.h"
-#include "glad/glad_wgl.h"
 #include "shader.h"
 
 int main() {
-    WindowBasePtr window = win32_createWindow(L"My Gui", WS_OVERLAPPEDWINDOW, 0, 100, 100, 800, 800);
-    if (!window) {
+    MainWindow mainWindow;
+
+    if (!mainWindow.createWindow(L"My Gui", WS_OVERLAPPEDWINDOW, 0, 100, 100, 800, 800)) {
         std::cout << "Failed to create the window: " << GetLastError() << "\n";
         return 0;
     }
-    if (!win32_makeContextCurrent(window->handle)) {
+    if (!mainWindow.makeContextCurrent()) {
         std::cout << "Failed to make the context current";
         return 0;
     }
@@ -52,13 +52,9 @@ int main() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-
-    
-
-
     myshader.use();
 
-    while (!win32_windowShouldClose(window->shouldClose)) {
+    while (!mainWindow.windowShouldClose()) {
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -66,8 +62,8 @@ int main() {
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        win32_updateWindow(window);
-        SwapBuffers(GetDC(window->handle));
+        mainWindow.updateWindow();
+        SwapBuffers(GetDC(mainWindow.handle()));
     }
 
     return 0;
