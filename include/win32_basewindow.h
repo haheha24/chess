@@ -12,7 +12,10 @@
 
 #include <windows.h>
 #include <iostream>
+#include <tuple>
 #include "glad/glad_wgl.h"
+
+typedef std::tuple<int, int> bWindowSize;
 
 template <class DERIVED_TYPE>
 class BaseWindow {
@@ -66,7 +69,7 @@ class BaseWindow {
 
         // Window config
         RECT windowRect = {};
-        SetRect(&windowRect, 1, 1, 32, 32);
+        SetRect(&windowRect, 0, 0, nWidth, nHeight);
         AdjustWindowRect(&windowRect, dwStyle, 0);
 
         hwnd = CreateWindowEx(
@@ -74,10 +77,10 @@ class BaseWindow {
             lpWindowName,  // This references lpszClassName from wc
             lpWindowName,  // This is the actual Title
             dwStyle,
-            CW_USEDEFAULT,
-            CW_USEDEFAULT,
-            CW_USEDEFAULT,
-            CW_USEDEFAULT,
+            x,
+            y,
+            nWidth,
+            nHeight,
             hWndParent,             // parent
             hMenu,                  // menu
             GetModuleHandle(NULL),  // handle instance
@@ -87,6 +90,9 @@ class BaseWindow {
             std::cerr << "Failed to create m_hwnd. ERROR: " << GetLastError() << "\n";
             return false;
         }
+
+        winWidth = nWidth;
+        winHeight = nHeight;
 
         // Show the main window
         ShowWindow(hwnd, SW_SHOW);
@@ -106,6 +112,9 @@ class BaseWindow {
                 DispatchMessage(&msg);  // Calls the callback specified when creating the window
             }
         }
+    }
+    void windowResize(int newWidth, int newHeight) {
+        glViewport(0, 0, newWidth, newHeight);
     }
     void closeWindow() {
         shouldClose = true;
@@ -177,7 +186,13 @@ class BaseWindow {
             return false;
         }
 
+        openglContextIsCurrent = true;
         return true;
+    }
+
+    void setWindowSize(int& width, int& height) {
+        width = winWidth;
+        height = winHeight;
     }
 
    protected:
@@ -185,4 +200,6 @@ class BaseWindow {
     virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
     HWND hwnd = 0;
     bool shouldClose = false;
+    bool openglContextIsCurrent = false;
+    int winWidth = 0, winHeight = 0;
 };
