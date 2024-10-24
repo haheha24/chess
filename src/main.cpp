@@ -6,6 +6,7 @@
 #include "application.h"
 #include "win32_mainwindow.h"
 #include "shader.h"
+#include "StbImageLoader.h"
 
 int main() {
     MainWindow mainWindow;
@@ -58,7 +59,7 @@ int main() {
     glEnableVertexAttribArray(1);
 
     myshader.use();
-    auto start = std::chrono::high_resolution_clock::now();
+    /* auto start = std::chrono::high_resolution_clock::now(); */
 
     POINT mousePtr;
 
@@ -68,18 +69,28 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         GetCursorPos(&mousePtr);
-        glm::mat4 trans = glm::mat4(1.0f);
-        /* float normMousePosX = (2.f * static_cast<float>(mousePtr.x) / screenWidth - 1.f);
-        float normMousePosY = 1.f - (2.f * static_cast<float>(mousePtr.y) / screenHeight);
-        trans = glm::translate(trans, glm::vec3(normMousePosX, normMousePosY, 0.0f)); */
 
-        auto current = std::chrono::high_resolution_clock::now();
+        /* auto current = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> duration = current - start;
         float time = duration.count();
-        trans = glm::rotate(trans, time, glm::vec3(0.5f, 0.f, 0.5f));
+        trans = glm::rotate(trans, time, glm::vec3(0.5f, 0.f, 0.5f)); */
 
-        unsigned int transLoc = glGetUniformLocation(myshader.ID, "transform");
-        glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        glm::mat4 view = glm::mat4(1.0f);
+        // note that we're translating the scene in the reverse direction of where we want to move
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+        int modelLoc = glGetUniformLocation(myshader.ID, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        int viewLoc = glGetUniformLocation(myshader.ID, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        int projectionLoc = glGetUniformLocation(myshader.ID, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
