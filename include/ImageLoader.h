@@ -8,8 +8,8 @@ class StbImageLoader {
     int GetWidth();
     int GetHeight();
     int GetNrChannels();
-    void SetData(const char* path);
-    void SetData(const char* path, int desiredChannels);
+    void LoadImage(const char* path);
+    void LoadImage(const char* path, int desiredChannels);
     unsigned int GetData();
 
    private:
