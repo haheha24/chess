@@ -1,8 +1,11 @@
 #version 330 core
-out vec4 FragColor;
-in vec4 vertexColor;
+out vec4 FragTex;
+
+in vec2 texCoord;
+
+uniform sampler2D cheeky;
 
 void main()
 {
-    FragColor = vec4(vertexColor);
+    FragTex = texture(cheeky, texCoord);
 }
